@@ -4,7 +4,7 @@
 % : %.o
 	$(CC) $(CCLDFLAGS) -o $@ $^ $(foreach lib,$(LIBS),-l$(lib))
 
-%.so : 
+%.so :
 	$(CC) $(INCDIR) $(CFLAGS) -Wl,-soname,$(SONAME) $(CCLDFLAGS) $^ -o $@
 
 %.o: %.c
@@ -20,3 +20,8 @@
 	$(CC) $(INCDIR) $(CFLAGS) $(CPPFLAGS) -E $< -o $@
 
 %.c : %.h
+
+% : %.in
+	sed							\
+		-e 's/@@VERSION@@/$(VERSION)/g'			\
+		< $^ > $@
