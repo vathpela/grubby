@@ -1,0 +1,7 @@
+CC		= gcc
+CFLAGS		+= $(RPM_OPT_FLAGS) -std=gnu99 -Wall -Werror -Wno-error=unused-function -Wno-unused-function -ggdb
+CCLDFLAGS	= -shared
+LDFLAGS		:= 
+INSTALL		= install
+
+
