@@ -1,3 +1,6 @@
+#!/bin/bash
+# -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+# ex: ts=8 sw=4 sts=4 et filetype=sh
 #
 # Copyright 2002-2013 Red Hat, Inc.
 #
@@ -14,6 +17,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+set -E
+set -e
 
+if [ -x /usr/libexec/grubby/functions ]; then
+    source /usr/libexec/grubby/functions
+else
+    echo "Could not import grubby library functions" 1>&2
+    exit 1
+fi
 
+checkarch x86_64
+checkcfg /etc/grub2-efi.cfg
 
+get_loader_specific_args()
+{
+    echo --efi
+}
+
+main "$@"
