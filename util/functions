@@ -35,7 +35,7 @@ usage() {
 
 checkarch()
 {
-    ARCH=$(uname -m | sed s,i[3456789]86,ia32,)
+    ARCH="$(uname -m | sed s,i[3456789]86,ia32,)"
     case $1 in
     $ARCH)
         return 0
@@ -68,7 +68,7 @@ should_use_multiboot()
 
 depmod()
 {
-    local version=$1
+    local version="$1"
 
     [ -n "$verbose" ] && echo "running depmod for $version"
     depmod -ae -F /boot/System.map-$version $version
@@ -76,7 +76,7 @@ depmod()
 
 rmdepmod()
 {
-    local version=$1
+    local version="$1"
 
     [ -n "$verbose" ] && echo "removing modules.dep info for $version"
     if [ -d /lib/modules/$version ]; then
@@ -87,10 +87,10 @@ rmdepmod()
 
 mkramfs()
 {
-    local version=$1
+    local version="$1"
     local bootprefix=/boot
     if is_defined_function get_boot_prefix ; then
-        bootprefix=$(get_boot_prefix)
+        bootprefix="$(get_boot_prefix)"
     fi
     initrdfile="$bootprefix/$initramfs-$version"
 
@@ -101,10 +101,10 @@ mkramfs()
 
 rmramfs()
 {
-    local version=$1
+    local version="$1"
     local bootprefix=/boot
     if is_defined_function get_boot_prefix ; then
-        bootprefix=$(get_boot_prefix)
+        bootprefix="$(get_boot_prefix)"
     fi
     initrdfile="$bootprefix/initramfs-$version"
 
@@ -114,8 +114,9 @@ rmramfs()
 
 default_get_title()
 {
-    version=$1
+    local version="$1"
 
+    local title=""
     if [ -f /etc/os-release ]; then
         . /etc/os-release
         title="$NAME ($version) $VERSION"
@@ -156,21 +157,21 @@ default_get_kernel_args()
 
 default_add()
 {
-    local version=$1
+    local version="$1"
 
     local package="kernel"
     [[ "$2" == *\+* ]] && package="kernel-${2##*+}"
-    local kernelimage=$2
+    local kernelimage="$2"
 
     if [ -z "$kernelimage" ]; then
         local kernelname=vmlinuz
         if is_defined_function get_kernel_name ; then
-            kernelname=$(get_kernel_name)
+            kernelname="$(get_kernel_name)"
         fi
         
         local bootprefix=/boot
         if is_defined_function get_boot_prefix ; then
-            bootprefix=$(get_boot_prefix)
+            bootprefix="$(get_boot_prefix)"
         fi
         kernelimage="$bootprefix/$kernelname-$version"
     fi
@@ -186,21 +187,21 @@ default_add()
 
     local title=""
     if is_defined_function get_title ; then
-        title=$(get_title $version)
+        title="$(get_title $version)"
     else
-        title=$(default_get_title $version)
+        title="$(default_get_title $version)"
     fi
 
     local rootdevice=""
     if is_defined_function get_root_device ; then
-        rootdevice=$(get_root_device);
+        rootdevice="$(get_root_device)"
     else
-        rootdevice=$(default_get_root_device)
+        rootdevice="$(default_get_root_device)"
     fi
 
     local extraargs=""
     if is_defined_function get_loader_specific_args ; then
-        extraargs=$(get_loader_specific_args)
+        extraargs="$(get_loader_specific_args)"
     fi
 
     local makedefault=""
@@ -211,21 +212,21 @@ default_add()
 
     local kernelargs=""
     if is_defined_function get_kernel_args ; then
-        kernelargs=$(get_kernel_args)
+        kernelargs="$(get_kernel_args)"
     else
-        kernelargs=$(default_get_kernel_args)
+        kernelargs="$(default_get_kernel_args)"
     fi
 
-    grubby $loader $config $extraargs --add-kernel=$kernelimage \
-        --title "$title" --package=$package --copy-default $makedefault \
+    grubby $loader $config $extraargs --add-kernel="$kernelimage" \
+        --title "$title" --package="$package" --copy-default $makedefault \
         $MBK $MBA --args="root=$rootdevice $kernelargs" \
         --remove-kernel="TITLE=$title"
 }
 
 default_remove()
 {
-    local version=$1
-    local kernelimage=$2
+    local version="$1"
+    local kernelimage="$2"
 
     local files
     local f
@@ -239,19 +240,19 @@ default_remove()
 
     local extraargs=""
     if is_defined_function get_loader_specific_args ; then
-        extraargs=$(get_loader_specific_args)
+        extraargs="$(get_loader_specific_args)"
     fi
 
-    grubby $loader $config $extraargs --remove-kernel=$kernelimage
+    grubby $loader $config $extraargs --remove-kernel="$kernelimage"
 }
 
 default_addramfs()
 {
-    local version=$1
+    local version="$1"
 
     local bootprefix=/boot
     if is_defined_function get_boot_prefix ; then
-        bootprefix=$(get_boot_prefix)
+        bootprefix="$(get_boot_prefix)"
     fi
     initrdfile="$bootprefix/initramfs-$version"
 
@@ -260,14 +261,14 @@ default_addramfs()
         INITRD="$INITRD --extra-initrd $bootprefix/$extraramfs"
     fi
 
-    grubby $loader $config $extraargs --update-kernel=$kernelimage \
+    grubby $loader $config $extraargs --update-kernel="$kernelimage" \
         $INITRD
 }
 
 default_finalize()
 {
-    local version=$1
-    local kernelimage=$2
+    local version="$1"
+    local kernelimage="$2"
 
     local files
     local f
@@ -288,7 +289,7 @@ loader=""
 configfile=""
 verbose=""
 
-if [ -n "$HOSTONLY_INITRAMFS" -a "$HOSTONLY_INITRAMFS" == "true" ]; then
+if [ "$HOSTONLY_INITRAMFS" == "true" ]; then
     dracuthostonly="-H"
 fi
 
@@ -321,13 +322,13 @@ main()
             ;;
         *)
             if [ -z "$mode" ]; then
-                mode=$1
+                mode="$1"
             elif [ -z "$version" ]; then
-                version=$1
+                version="$1"
             elif [ -z "$kernelimage" ]; then
-                kernelimage=$1
+                kernelimage="$1"
             else
-                usage 1>&2
+                usage >&2
                 exit 1
             fi
             ;;
@@ -340,34 +341,34 @@ main()
     case "$mode" in
     --install|--add|add)
         if is_defined_function add ; then
-            add $version $kernelimage
+            add "$version" "$kernelimage"
         else
-            default_add $version $kernelimage
+            default_add "$version" "$kernelimage"
         fi
         ;;
     --remove|remove)
-        rmdepmod $version $kernelimage
-        rmramfs $version $kernelimage
+        rmdepmod "$version" "$kernelimage"
+        rmramfs "$version" "$kernelimage"
         if is_defined_function remove ; then
-            remove $version $kernelimage
+            remove "$version" "$kernelimage"
         else
-            default_remove $version $kernelimage
+            default_remove "$version" "$kernelimage"
         fi
         ;;
     --addramfs|addramfs)
-        depmod $version $kernelimage
-        mkramfs $version $kernelimage
+        depmod "$version" "$kernelimage"
+        mkramfs "$version" "$kernelimage"
         if is_defined_function addramfs ; then
-            addramfs $version $kernelimage
+            addramfs "$version" "$kernelimage"
         else
-            default_addramfs $version $kernelimage
+            default_addramfs "$version" "$kernelimage"
         fi
         ;;
     --rpmposttrans|--finalize|finalize)
         if is_defined_function finalize ; then
-            finalize $version $kernelimage
+            finalize "$version" "$kernelimage"
         else
-            default_finalize $version $kernelimage
+            default_finalize "$version" "$kernelimage"
         fi
         ;;
     esac
